@@ -45,6 +45,11 @@ class Settings:
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
     ollama_timeout_seconds: int = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "180"))
+    ollama_num_ctx: int = int(os.getenv("OLLAMA_NUM_CTX", "8192"))
+    ollama_num_predict: int = int(os.getenv("OLLAMA_NUM_PREDICT", "2048"))
+    ollama_safety_margin: int = int(os.getenv("OLLAMA_SAFETY_MARGIN", "512"))
+    token_estimator_type: str = os.getenv("TOKEN_ESTIMATOR_TYPE", "auto")
+    tokenizer_name_or_path: str = os.getenv("TOKENIZER_NAME_OR_PATH", "Qwen/Qwen2.5-3B")
     max_articles_per_llm_batch: int = int(
         os.getenv("MAX_ARTICLES_PER_LLM_BATCH", "10")
     )

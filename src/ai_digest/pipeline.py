@@ -468,35 +468,5 @@ class DigestPipeline:
     def _summarize_in_chunks(
         self, summarizer: OllamaSummarizer, items: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        if not items:
-            return summarizer.summarize([])
-        chunk_size = max(1, self.settings.max_articles_per_llm_batch)
-        if len(items) <= chunk_size:
-            return summarizer.summarize(items)
-
-        # Chunk items to keep prompt size bounded
-        chunks = [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)]
-        outputs = [summarizer.summarize(chunk) for chunk in chunks]
-        developments: list[dict[str, Any]] = []
-        seen: set[str] = set()
-
-        for output in outputs:
-            for development in output.get("developments", []):
-                key = re.sub(r"\W+", " ", development.get("title", "").lower()).strip()
-                if key and key not in seen:
-                    seen.add(key)
-                    developments.append(development)
-
-        return {
-            "digest_title": "AI Developments Digest",
-            "executive_summary": "\n\n".join(
-                output.get("executive_summary", "") for output in outputs if output.get("executive_summary")
-            ),
-            "developments": sorted(developments, key=lambda item: item.get("importance", 3), reverse=True),
-            "themes": list(dict.fromkeys(theme for output in outputs for theme in output.get("themes", []))),
-            "watchlist": list(dict.fromkeys(item for output in outputs for item in output.get("watchlist", []))),
-            "caveats": list(dict.fromkeys(item for output in outputs for item in output.get("caveats", []))),
-            "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "llm_model": self.settings.ollama_model,
-            "llm_chunks": len(chunks),
-        }
+        """Summarize items using token-aware dynamic batching handled by OllamaSummarizer."""
+        return summarizer.summarize(items)
