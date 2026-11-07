@@ -115,60 +115,66 @@ def _digest_markdown(digest: dict[str, Any], batch_path: str | None = None) -> s
         "",
         f"> Generated: {digest.get('generated_at', '')}",
         "",
-        "## Executive summary",
-        "",
-        digest.get("executive_summary", "No summary available."),
-        "",
     ]
+    exec_summary = str(digest.get("executive_summary") or "").strip()
+    if exec_summary and exec_summary != "No summary available.":
+        lines.extend([
+            "## Executive summary",
+            "",
+            exec_summary,
+            "",
+        ])
     if digest.get("developments"):
         lines.extend(["## Developments", ""])
         for index, item in enumerate(digest["developments"], start=1):
             title = item.get("title", item.get("canonical_title", "Untitled development"))
             article_count = item.get("article_count", len(item.get("sources", [])))
             primary = item.get("primary_source", {})
-            primary_name = primary.get("source_name") or primary.get("name") if isinstance(primary, dict) else ""
+            primary_name = (
+                primary.get("source_name")
+                or primary.get("name")
+                if isinstance(primary, dict)
+                else ""
+            )
             primary_url = primary.get("url") if isinstance(primary, dict) else ""
 
-            meta_parts = [
-                f"**Category:** {item.get('category', 'AI')}",
-                f"**Importance:** {item.get('importance', 3)}/5",
-                f"**Maturity:** {item.get('maturity', 'unclear')}",
-            ]
-            if article_count > 1:
-                meta_parts.append(f"**Sources:** {article_count} reporting publications")
+            importance = item.get("importance", 3)
 
             lines.extend([
                 f"### {index}. {title}",
                 "",
-                " | ".join(meta_parts) + "  ",
+                f"**Importance:** {importance}/5  ",
             ])
 
             if primary_name and primary_url:
                 lines.append(f"**Primary Source:** [{primary_name}]({primary_url})  ")
+            elif primary_name:
+                lines.append(f"**Primary Source:** {primary_name}  ")
             lines.append("")
 
-            # Consolidated summary if available
-            consolidated = item.get("consolidated_summary")
-            if consolidated and consolidated != item.get("what_happened"):
+            # Consolidated summary
+            consolidated = (
+                item.get("consolidated_summary")
+                or item.get("what_happened")
+                or ""
+            ).strip()
+            if consolidated:
                 lines.extend([
                     "**Consolidated Summary**",
                     consolidated,
                     "",
                 ])
 
-            lines.extend([
-                "**What happened**",
-                item.get("what_happened", ""),
-                "",
-                "**Technical details**",
-                item.get("technical_details", ""),
-                "",
-                "**Why it matters**",
-                item.get("why_it_matters", ""),
-                "",
-            ])
+            # Technical details
+            tech_details = str(item.get("technical_details", "")).strip()
+            if tech_details:
+                lines.extend([
+                    "**Technical details**",
+                    tech_details,
+                    "",
+                ])
 
-            # Rich multi-source attribution
+            # Multi-source attribution
             sources = item.get("sources", [])
             urls = item.get("source_urls", [])
 

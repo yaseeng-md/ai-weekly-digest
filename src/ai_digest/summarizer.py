@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -24,18 +25,12 @@ For each story cluster:
 
 Return valid JSON matching this schema:
 {
-  "digest_title": "string",
-  "executive_summary": "string",
   "developments": [
     {
       "story_id": "string",
       "title": "string",
-      "category": "string",
-      "what_happened": "string",
-      "technical_details": "string",
-      "why_it_matters": "string",
       "consolidated_summary": "string",
-      "maturity": "research | prototype | preview | production | unclear",
+      "technical_details": "string",
       "importance": 1
     }
   ],
@@ -143,6 +138,9 @@ class OllamaSummarizer:
             + json.dumps(llm_payload_clusters, ensure_ascii=False, indent=2)
         )
 
+        num_ctx = int(getattr(self.settings, "ollama_num_ctx", 8192))
+        num_predict = int(getattr(self.settings, "ollama_num_predict", 2048))
+
         endpoint = self.settings.ollama_base_url.rstrip("/") + "/api/chat"
         response = self.session.post(
             endpoint,
@@ -150,7 +148,11 @@ class OllamaSummarizer:
                 "model": self.settings.ollama_model,
                 "stream": False,
                 "format": "json",
-                "options": {"temperature": 0.2},
+                "options": {
+                    "temperature": 0.2,
+                    "num_ctx": num_ctx,
+                    "num_predict": num_predict,
+                },
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_prompt},
@@ -158,14 +160,38 @@ class OllamaSummarizer:
             },
             timeout=self.settings.ollama_timeout_seconds,
         )
+        logger.info(
+            "Ollama request | model=%s | num_ctx=%d | num_predict=%d | prompt_chars=%d",
+            self.settings.ollama_model,
+            num_ctx,
+            num_predict,
+            len(user_prompt),
+        )
+
         response.raise_for_status()
         payload = response.json()
-        message = payload.get("message", {}).get("content", "")
+        message = payload.get("message", {}).get("content", "").strip()
+
+        # Clean potential markdown wrapping
+        if message.startswith("```"):
+            message = re.sub(r"^```(?:json)?\s*", "", message)
+            message = re.sub(r"\s*```$", "", message).strip()
 
         try:
             result = json.loads(message)
         except json.JSONDecodeError as exc:
-            raise ValueError(f"Ollama did not return valid JSON: {message[:500]}") from exc
+            # If Ollama cut off near the end, try to close unclosed brackets/braces
+            repaired = False
+            for suffix in ["}]}", "]}", "}", "]"]:
+                try:
+                    result = json.loads(message + suffix)
+                    repaired = True
+                    logger.warning("Repaired incomplete JSON from Ollama using suffix '%s'", suffix)
+                    break
+                except json.JSONDecodeError:
+                    continue
+            if not repaired:
+                raise ValueError(f"Ollama did not return valid JSON: {message[:500]}") from exc
 
         validated = self._validate_cluster_summary(result, clusters)
         validated["llm_model"] = self.settings.ollama_model
@@ -228,28 +254,23 @@ class OllamaSummarizer:
             except (TypeError, ValueError):
                 importance = 3
 
-            what_happened = str(dev.get("what_happened", ""))
-            technical_details = str(dev.get("technical_details", ""))
-            why_it_matters = str(dev.get("why_it_matters", ""))
-            consolidated_summary = str(dev.get("consolidated_summary") or "").strip()
-            if not consolidated_summary:
-                consolidated_summary = f"{what_happened} {technical_details}".strip()
+            technical_details = str(dev.get("technical_details", "")).strip()
+            consolidated_summary = str(
+                dev.get("consolidated_summary") or dev.get("what_happened", "")
+            ).strip()
 
             cleaned_developments.append({
                 "story_id": cluster.get("story_id"),
                 "canonical_title": canonical_title,
                 "title": str(dev.get("title") or canonical_title),
-                "category": str(dev.get("category") or cluster.get("category") or "AI"),
-                "what_happened": what_happened,
-                "technical_details": technical_details,
-                "why_it_matters": why_it_matters,
-                "consolidated_summary": consolidated_summary,
-                "maturity": str(dev.get("maturity", "unclear")),
                 "importance": importance,
-                "article_count": cluster.get("article_count", len(sources)),
+                "consolidated_summary": consolidated_summary,
+                "what_happened": consolidated_summary,  # backward compatibility alias
+                "technical_details": technical_details,
                 "primary_source": primary_source,
                 "sources": sources,
                 "source_urls": source_urls,
+                "article_count": cluster.get("article_count", len(sources)),
             })
 
         result["developments"] = cleaned_developments
