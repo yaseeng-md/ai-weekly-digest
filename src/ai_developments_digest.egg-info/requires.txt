@@ -1,0 +1,10 @@
+beautifulsoup4<5,>=4.12
+feedparser<7,>=6.0.11
+python-dotenv<2,>=1.0
+qdrant-client<2,>=1.14
+requests<3,>=2.32
+sentence-transformers<6,>=3.4
+
+[dev]
+pytest<9,>=8
+ruff<1,>=0.11

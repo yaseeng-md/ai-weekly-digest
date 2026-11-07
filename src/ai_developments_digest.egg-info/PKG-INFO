@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: ai-developments-digest
+Version: 0.1.0
+Summary: Collect AI RSS/Atom feeds, deduplicate with SQLite and Qdrant, and summarize with a local LLM.
+Requires-Python: >=3.10
+Requires-Dist: beautifulsoup4<5,>=4.12
+Requires-Dist: feedparser<7,>=6.0.11
+Requires-Dist: python-dotenv<2,>=1.0
+Requires-Dist: qdrant-client<2,>=1.14
+Requires-Dist: requests<3,>=2.32
+Requires-Dist: sentence-transformers<6,>=3.4
+Provides-Extra: dev
+Requires-Dist: pytest<9,>=8; extra == "dev"
+Requires-Dist: ruff<1,>=0.11; extra == "dev"

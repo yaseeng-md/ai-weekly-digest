@@ -1,0 +1,13 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai-digest-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ai_digest_qdrant_storage:/qdrant/storage
+
+volumes:
+  ai_digest_qdrant_storage:

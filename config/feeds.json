@@ -1,0 +1,122 @@
+[
+  {
+    "name": "OpenAI News",
+    "url": "https://openai.com/news/rss.xml",
+    "category": "official_release",
+    "enabled": true
+  },
+  {
+    "name": "Google DeepMind Blog",
+    "url": "https://deepmind.google/blog/rss.xml",
+    "category": "official_research",
+    "enabled": true
+  },
+  {
+    "name": "Google Research Blog",
+    "url": "https://research.google/blog/rss/",
+    "category": "official_research",
+    "enabled": true
+  },
+  {
+    "name": "Hugging Face Blog",
+    "url": "https://huggingface.co/blog/feed.xml",
+    "category": "open_source",
+    "enabled": true
+  },
+  {
+    "name": "NVIDIA Blog",
+    "url": "https://blogs.nvidia.com/feed/",
+    "category": "ai_infrastructure",
+    "enabled": true
+  },
+  {
+    "name": "AWS Machine Learning Blog",
+    "url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+    "category": "ai_infrastructure",
+    "enabled": true
+  },
+  {
+    "name": "arXiv Artificial Intelligence",
+    "url": "https://rss.arxiv.org/rss/cs.AI",
+    "category": "research_paper",
+    "enabled": true
+  },
+  {
+    "name": "arXiv Computation and Language",
+    "url": "https://rss.arxiv.org/rss/cs.CL",
+    "category": "research_paper",
+    "enabled": true
+  },
+  {
+    "name": "arXiv Machine Learning",
+    "url": "https://rss.arxiv.org/rss/cs.LG",
+    "category": "research_paper",
+    "enabled": true
+  },
+  {
+    "name": "arXiv Computer Vision",
+    "url": "https://rss.arxiv.org/rss/cs.CV",
+    "category": "research_paper",
+    "enabled": true
+  },
+  {
+    "name": "TechCrunch AI",
+    "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "category": "industry_news",
+    "enabled": true
+  },
+  {
+    "name": "MIT Technology Review AI",
+    "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+    "category": "industry_analysis",
+    "enabled": true
+  },
+  {
+    "name": "The Verge AI",
+    "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "category": "industry_news",
+    "enabled": true
+  },
+  {
+    "name": "Simon Willison's Weblog",
+    "url": "https://simonwillison.net/atom/everything/",
+    "category": "developer_tools",
+    "enabled": true
+  },
+  {
+    "name": "Import AI",
+    "url": "https://importai.substack.com/feed",
+    "category": "newsletter",
+    "enabled": true
+  },
+  {
+    "name": "Qwen Blog",
+    "url": "https://qwenlm.github.io/blog/index.xml",
+    "category": "official_release",
+    "enabled": true
+  },
+  {
+    "name": "Transformers GitHub Releases",
+    "url": "https://github.com/huggingface/transformers/releases.atom",
+    "category": "developer_tools",
+    "enabled": true
+  },
+  {
+    "name": "LangGraph GitHub Releases",
+    "url": "https://github.com/langchain-ai/langgraph/releases.atom",
+    "category": "developer_tools",
+    "enabled": true
+  },
+  {
+    "name": "vLLM GitHub Releases",
+    "url": "https://github.com/vllm-project/vllm/releases.atom",
+    "category": "developer_tools",
+    "enabled": true
+  },
+  {
+    "name": "Qdrant GitHub Releases",
+    "url": "https://github.com/qdrant/qdrant/releases.atom",
+    "category": "developer_tools",
+    "enabled": true
+  }
+]

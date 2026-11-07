@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-developments-digest"
+version = "0.1.0"
+description = "Collect AI RSS/Atom feeds, deduplicate with SQLite and Qdrant, and summarize with a local LLM."
+requires-python = ">=3.10"
+dependencies = [
+  "beautifulsoup4>=4.12,<5",
+  "feedparser>=6.0.11,<7",
+  "python-dotenv>=1.0,<2",
+  "qdrant-client>=1.14,<2",
+  "requests>=2.32,<3",
+  "sentence-transformers>=3.4,<6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "ruff>=0.11,<1"]
+
+[project.scripts]
+ai-digest = "ai_digest.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
