@@ -5,7 +5,7 @@ import logging
 import sqlite3
 from datetime import datetime, timezone
 from typing import Any
-
+from datetime import datetime, timedelta, timezone
 logger = logging.getLogger(__name__)
 
 
@@ -229,19 +229,30 @@ class ClusterRepository:
         return [str(row["id"]) for row in rows]
 
     def get_pending_cluster_ids(self) -> list[str]:
-        """Return cluster IDs that contain articles with pending or error LLM status."""
+        """Return cluster IDs containing pending/error articles published within the last 24 hours."""
+
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(hours=72)
+        ).isoformat().replace("+00:00", "Z")
+
         with self.store.connection() as conn:
             rows = conn.execute(
                 """
-                SELECT DISTINCT sca.story_id
+                SELECT sca.story_id
                 FROM story_cluster_articles sca
                 JOIN items i ON sca.article_id = i.id
                 WHERE i.llm_status IN ('pending', 'error')
-                ORDER BY sca.assigned_at ASC
-                """
+                AND i.published_at IS NOT NULL
+                AND julianday(i.published_at) >= julianday(?)
+                GROUP BY sca.story_id
+                ORDER BY MIN(sca.assigned_at) ASC
+                """,
+                (cutoff,),
             ).fetchall()
+        print("Shwoing all Cluster IDs",[str(row["story_id"]) for row in rows] )
         return [str(row["story_id"]) for row in rows]
 
+    
     def get_cluster_stats(self) -> dict[str, Any]:
         with self.store.connection() as conn:
             total_clusters = conn.execute(

@@ -19,3 +19,6 @@ output/normalized/
 /.vscode
 /test_outputs
 /test*
+/agent_knowledge
+AGENT.md
+TOKEN_AWARE_BATCHING_IMPLEMENTATION.md
