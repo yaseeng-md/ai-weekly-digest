@@ -228,28 +228,36 @@ class ClusterRepository:
             ).fetchall()
         return [str(row["id"]) for row in rows]
 
-    def get_pending_cluster_ids(self) -> list[str]:
-        """Return cluster IDs containing pending/error articles published within the last 24 hours."""
-
-        cutoff = (
-            datetime.now(timezone.utc) - timedelta(hours=72)
-        ).isoformat().replace("+00:00", "Z")
-
+    def get_pending_cluster_ids(self, lookback_hours: int | None = None) -> list[str]:
+        """Return cluster IDs that contain articles with pending or error LLM status."""
         with self.store.connection() as conn:
-            rows = conn.execute(
-                """
-                SELECT sca.story_id
-                FROM story_cluster_articles sca
-                JOIN items i ON sca.article_id = i.id
-                WHERE i.llm_status IN ('pending', 'error')
-                AND i.published_at IS NOT NULL
-                AND julianday(i.published_at) >= julianday(?)
-                GROUP BY sca.story_id
-                ORDER BY MIN(sca.assigned_at) ASC
-                """,
-                (cutoff,),
-            ).fetchall()
-        print("Shwoing all Cluster IDs",[str(row["story_id"]) for row in rows] )
+            if lookback_hours is not None:
+                cutoff = (
+                    datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+                ).isoformat().replace("+00:00", "Z")
+                rows = conn.execute(
+                    """
+                    SELECT sca.story_id
+                    FROM story_cluster_articles sca
+                    JOIN items i ON sca.article_id = i.id
+                    WHERE i.llm_status IN ('pending', 'error')
+                    AND (i.published_at IS NULL OR julianday(i.published_at) >= julianday(?))
+                    GROUP BY sca.story_id
+                    ORDER BY MIN(sca.assigned_at) ASC
+                    """,
+                    (cutoff,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT sca.story_id
+                    FROM story_cluster_articles sca
+                    JOIN items i ON sca.article_id = i.id
+                    WHERE i.llm_status IN ('pending', 'error')
+                    GROUP BY sca.story_id
+                    ORDER BY MIN(sca.assigned_at) ASC
+                    """
+                ).fetchall()
         return [str(row["story_id"]) for row in rows]
 
     

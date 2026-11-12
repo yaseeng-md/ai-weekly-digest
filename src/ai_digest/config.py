@@ -73,6 +73,10 @@ class Settings:
     story_cluster_ambiguity_margin: float = float(
         os.getenv("STORY_CLUSTER_AMBIGUITY_MARGIN", "0.03")
     )
+    notion_api_key: str | None = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN") or None
+    notion_root_page_id: str | None = os.getenv("NOTION_ROOT_PAGE_ID") or os.getenv("NOTION_PAGE_ID") or None
+    notion_enabled: bool = os.getenv("NOTION_ENABLED", "true").lower() in ("true", "1", "yes")
+    digest_type: str = os.getenv("DIGEST_TYPE", "daily").lower()
 
     def ensure_directories(self) -> None:
         for path in (

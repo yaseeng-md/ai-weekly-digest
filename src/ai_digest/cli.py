@@ -82,7 +82,24 @@ def main() -> None:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("run", help="Collect feeds, normalize, deduplicate, and generate a digest")
+    run_parser = subparsers.add_parser("run", help="Collect feeds, normalize, deduplicate, and generate a digest")
+    run_parser.add_argument(
+        "--digest-type",
+        choices=["daily", "weekly", "both"],
+        default="daily",
+        help="Type of digest to generate and log to Notion ('daily', 'weekly', or 'both')",
+    )
+    run_parser.add_argument(
+        "--no-notion",
+        action="store_true",
+        help="Disable Notion synchronization for this run",
+    )
+    run_parser.add_argument(
+        "--notion-page-id",
+        type=str,
+        default=None,
+        help="Optional Notion root page ID override",
+    )
     subparsers.add_parser("feeds", help="List enabled configured feeds")
     subparsers.add_parser("stats", help="Show SQLite collection statistics")
 
